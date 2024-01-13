@@ -6,18 +6,18 @@
           <li class="tabs-title">
             <a
               class="px-4 text-gray-800 rounded-t-lg cursor-pointer group"
-              :aria-selected="openTab === 1 ? 'true' : 'false'"
+              :aria-selected="state.openTab === 1 ? 'true' : 'false'"
               @click="toggleTabs(1)"
               :class="{
-                'text-black hover-active ': openTab !== 1,
-                'text-green-600 border-active': openTab === 1,
+                'text-black hover-active ': state.openTab !== 1,
+                'text-blue-600 border-active': state.openTab === 1,
               }"
             >
               <IconSvg
                 class="mr-2"
                 :class="{
-                  ' group-hover:!bg-blue-600 ': openTab !== 1,
-                  '!bg-green-600 ': openTab === 1,
+                  ' group-hover:!bg-blue-600 ': state.openTab !== 1,
+                  '!bg-blue-600 ': state.openTab === 1,
                 }"
                 icon="/icons/common/link.svg"
                 :size="24"
@@ -29,17 +29,17 @@
             <a
               class="px-4 text-gray-800 rounded-t-lg cursor-pointer group"
               @click="toggleTabs(2)"
-              :aria-selected="openTab === 2 ? 'true' : 'false'"
+              :aria-selected="state.openTab === 2 ? 'true' : 'false'"
               :class="{
-                'text-black hover-active ': openTab !== 2,
-                'text-green-600 border-active': openTab === 2,
+                'text-black hover-active ': state.openTab !== 2,
+                'text-blue-600 border-active': state.openTab === 2,
               }"
             >
               <IconSvg
                 class="mr-2"
                 :class="{
-                  ' group-hover:!bg-blue-600 ': openTab !== 2,
-                  '!bg-green-600 ': openTab === 2,
+                  ' group-hover:!bg-blue-600 ': state.openTab !== 2,
+                  '!bg-blue-600 ': state.openTab === 2,
                 }"
                 icon="/icons/common/qr-code.svg"
                 :size="24"
@@ -49,93 +49,61 @@
           </li>
         </ul>
 
-        <!-- <div class="flex flex-col break-words shadow-none border-3 border-gray-300 border-solid rounded-16"> -->
         <div
           class="px-4 py-5 flex-auto border-[3px] border-gray-300 border-solid rounded-lg bg-white mt-0"
         >
           <div class="tab-content tab-space">
-            <div v-bind:class="{ hidden: openTab !== 1, block: openTab === 1 }">
-              <form class="flex flex-wrap gap-3 w-full p-5">
-                <div class="font-bold text-[32px] mb-0">
-                  <p>Shorten a long link</p>
-                </div>
+            <div
+              v-bind:class="{
+                hidden: state.openTab !== 1,
+                block: state.openTab === 1,
+              }"
+            >
+              <FormLink ref="formLinkRef" @submit="handleSubmit" />
 
-                <label
-                  class="relative w-full flex flex-col mb-2 text-[20px] font-medium text-gray-900"
+              <div class="mt-0 px-5">
+                <span
+                  class="p-3 w-full inline-flex items-center gap-x-1 text-md font-medium bg-blue-100 text-blue-800 rounded"
                 >
-                  <span class="font-bold mb-3">Paste a long URL</span>
-                  <input
-                    class="rounded-md peer pl-6 pr-2 py-2 border-2 border-gray-500 placeholder-gray-400"
-                    type="text"
-                    name="long-link"
-                    placeholder="Example: https://long-ling.com/long"
+                  <IconSvg
+                    class="mr-3 !bg-blue-800"
+                    icon="/icons/common/stars.svg"
+                    :size="24"
                   />
-                </label>
+                  Make your link unique
+                </span>
+              </div>
 
-                <label
-                  class="relative flex-1 flex flex-col mb-2 text-[20px] font-medium text-gray-900"
+              <div class="px-5 mt-5">
+                <button
+                  type="button"
+                  v-if="state.loading"
+                  disabled
+                  class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
                 >
-                  <span class="font-bold mb-3">Domain</span>
-                  <input
-                    class="rounded-md peer pl-12 pr-2 py-2 border-2 border-gray-500 placeholder-gray-500"
-                    type="text"
-                    name="domain"
-                    placeholder="MM/YY" disabled
-                  />
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="absolute bottom-0 left-0 -mb-0.5 transform translate-x-1/2 -translate-y-1/2 text-black peer-placeholder-shown:text-gray-900 h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    />
-                  </svg>
-                </label>
-
-                <label
-                  class="relative flex-1 flex flex-col mb-2 text-[20px] font-medium text-gray-900"
+                  <span
+                    class="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-white rounded-full"
+                    role="status"
+                    aria-label="loading"
+                  ></span>
+                  Loading...
+                </button>
+                <button
+                  v-else
+                  type="button"
+                  @click="submitRef()"
+                  class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
                 >
-                  <span class="font-bold flex items-center gap-3 mb-3">
-                    Enter a back-half <span class="font-normal">(optional)</span>
-                    <span class="relative group">
-                      <span
-                        class="hidden group-hover:flex justify-center items-center px-2 py-1 text-xs absolute -right-2 transform translate-x-full -translate-y-1/2 w-max top-1/2 bg-black text-white"
-                      >
-                        Hey ceci est une infobulle !</span
-                      >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </span>
-                  </span>
-                  <input
-                    class="rounded-md peer pl-6 pr-2 py-2 border-2 border-gray-500 placeholder-gray-400"
-                    type="text"
-                    name="short-link"
-                    placeholder="example: favorite-link"
-                  />
-                
-                </label>
-              </form>
+                  Generate your link
+                </button>
+              </div>
             </div>
-            <div v-bind:class="{ hidden: openTab !== 2, block: openTab === 2 }">
+            <div
+              v-bind:class="{
+                hidden: state.openTab !== 2,
+                block: state.openTab === 2,
+              }"
+            >
               <p>
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo ut
                 a corrupti odit quos, nulla odio possimus error enim quae dolor
@@ -158,20 +126,44 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "pink-tabs",
-  data() {
-    return {
-      openTab: 1,
+<script setup>
+const runtimeConfig = useRuntimeConfig();
+const state = reactive({
+  openTab: 1,
+  loading: false,
+});
+
+function toggleTabs(tabNumber) {
+  state.openTab = tabNumber;
+}
+
+const formLinkRef = ref(null);
+
+function submitRef() {
+  if (formLinkRef.value) {
+    formLinkRef.value.submitFormRef();
+  }
+}
+
+async function handleSubmit(fields) {
+  state.loading = true;
+  console.log(fields.longLink);
+
+  try {
+    const dataForm = {
+      url: fields.longLink,
+      short_link: fields.shortLink,
     };
-  },
-  methods: {
-    toggleTabs: function (tabNumber) {
-      this.openTab = tabNumber;
-    },
-  },
-};
+    const { data } = await useFetch(runtimeConfig.public.apiBase + "/shorten", {
+      method: "post",
+      body: dataForm,
+    });
+    console.log(data)
+    state.loading = false;
+  } catch (error) {
+    console.log(error);
+  }
+}
 </script>
 
 <style>
