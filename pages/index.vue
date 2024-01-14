@@ -59,26 +59,33 @@
                 block: state.openTab === 1,
               }"
             >
-              <FormLink ref="formLinkRef" @submit="handleSubmit" />
+              <FormLink
+                ref="formLinkRef"
+                @submit="handleSubmit"
+                :shortLinkIsReady="state.isError"
+              />
 
               <div class="mt-5 md:mt-0 px-5" v-if="!state.resultGenerateLink">
                 <span
                   class="p-3 w-full inline-flex items-center gap-x-1 text-md font-medium bg-blue-100 text-blue-800 rounded"
+                  :class="{ 'bg-red-100 text-red-800': state.isError }"
                 >
                   <IconSvg
                     class="mr-3 !bg-blue-800"
+                    :class="{ ' !bg-red-800': state.isError }"
                     icon="/icons/common/stars.svg"
                     :size="24"
                   />
-                  Make your link unique
+                  {{
+                    state.isError
+                      ? "The short link is already exists."
+                      : "Make your link unique"
+                  }}
                 </span>
               </div>
 
               <div class="mt-5 md:mt-2 px-5" v-else>
-                <CopyToClip
-                  :url="state.resultGenerateLink"
-                  
-                />
+                <CopyToClip :url="state.resultGenerateLink" />
               </div>
 
               <div class="px-5 mt-5">
@@ -86,7 +93,10 @@
                   type="button"
                   v-if="state.loading"
                   disabled
-                  class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                  class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                  :class="{
+                    'bg-red-600 text-white hover:bg-red-700': state.isError,
+                  }"
                 >
                   <span
                     class="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-white rounded-full"
@@ -99,7 +109,10 @@
                   v-else
                   type="button"
                   @click="submitRef()"
-                  class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                  :class="{
+                    'bg-red-600 text-white hover:bg-red-700': state.isError,
+                  }"
+                  class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
                 >
                   <IconSvg
                     class="!bg-white"
@@ -116,20 +129,56 @@
                 block: state.openTab === 2,
               }"
             >
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo ut
-                a corrupti odit quos, nulla odio possimus error enim quae dolor
-                velit deserunt adipisci, voluptatibus magnam. Enim tempore
-                similique doloremque fugit laborum quod natus labore culpa
-                dignissimos magni? Earum, expedita facere natus in sed magnam
-                laborum exercitationem. Aliquam accusantium similique quibusdam
-                officiis voluptatibus? Similique soluta autem vel labore animi,
-                totam earum culpa iste officiis laborum ipsam accusantium est
-                asperiores ad minima, nostrum doloremque aliquam quos impedit
-                magni, explicabo laboriosam tempore. Tempore maiores quis iste
-                repellendus fugiat velit non minima ipsam, consectetur ullam
-                nostrum in omnis hic ratione ex! Quos, officia.
-              </p>
+              <div class="font-bold text-[32px] mb-0 p-5">
+                <p>Create QR Code</p>
+              </div>
+
+              <GenerateQRCode ref="generateQR" />
+
+              <FormQrCode ref="formQRRef" @submit="createQrCode" />
+
+              <div class="px-5 mt-5">
+                <button
+                  type="button"
+                  v-if="state.loading"
+                  disabled
+                  class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  <span
+                    class="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-white rounded-full"
+                    role="status"
+                    aria-label="loading"
+                  ></span>
+                  Loading...
+                </button>
+                <div v-else>
+                  <button
+                    type="button"
+                    @click="submitQRRef()"
+                    class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    <IconSvg
+                      class="!bg-white"
+                      icon="/icons/common/star-fall-2.svg"
+                      :size="24"
+                    />
+                    Generate your QR Code
+                  </button>
+                  <button
+                    type="button"
+                    @click="downloadQRCode()"
+                    :disabled="!state.resultGenerateLinkQR"
+                    class="ml-3 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    <IconSvg
+                      class="!bg-white"
+                      icon="/icons/common/download.svg"
+                      :size="24"
+                    />
+                    Download QR Code
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -144,6 +193,8 @@ const state = reactive({
   openTab: 1,
   loading: false,
   resultGenerateLink: "",
+  isError: false,
+  resultGenerateLinkQR: "",
 });
 
 function toggleTabs(tabNumber) {
@@ -151,6 +202,8 @@ function toggleTabs(tabNumber) {
 }
 
 const formLinkRef = ref(null);
+const formQRRef = ref(null);
+const generateQR = ref(null);
 
 function submitRef() {
   if (formLinkRef.value) {
@@ -158,25 +211,69 @@ function submitRef() {
   }
 }
 
-async function handleSubmit(fields) {
-  state.loading = true;
-  state.resultGenerateLink = "";
+function submitQRRef() {
+  if (formQRRef.value) {
+    formQRRef.value.submitFormQRRef();
+  }
+}
+
+async function fetchData(body, apiEndpoint = "/shorten", method = "post") {
   try {
+    const response = await useFetch(
+      runtimeConfig.public.apiBase + apiEndpoint,
+      {
+        method: method,
+        body: body,
+      }
+    );
+
+    return response.data.value.data.short_link;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function handleSubmit(fields) {
+  try {
+    state.loading = true;
+    state.isError = false;
+
     const dataForm = {
       url: fields.longLink,
       short_link: fields.shortLink,
     };
-    const { data } = await useFetch(runtimeConfig.public.apiBase + "/shorten", {
-      method: "post",
-      body: dataForm,
-    });
 
-    state.resultGenerateLink = data.value.data.short_link;
-
+    state.resultGenerateLink = await fetchData(dataForm);
+  } catch (error) {
+    state.isError = true;
+    console.error(error);
+  } finally {
     state.loading = false;
+  }
+}
+
+async function createQrCode(fields) {
+  try {
+    state.loading = true;
+
+    const dataForm = {
+      url: fields.longLink,
+    };
+
+    state.resultGenerateLinkQR = await fetchData(dataForm);
+    if (generateQR.value && state.resultGenerateLinkQR) {
+      generateQR.value.generateQrCode(state.resultGenerateLinkQR);
+    }
   } catch (error) {
     console.error(error);
+  } finally {
     state.loading = false;
+  }
+}
+
+function downloadQRCode() {
+  if (generateQR.value) {
+    generateQR.value.downloadQrCode();
   }
 }
 </script>
