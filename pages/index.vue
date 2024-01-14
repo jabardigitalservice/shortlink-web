@@ -151,7 +151,7 @@
                   ></span>
                   Loading...
                 </button>
-                <div v-else>
+                <div v-else class="flex flex-col sm:flex-row gap-3">
                   <button
                     type="button"
                     @click="submitQRRef()"
@@ -164,11 +164,12 @@
                     />
                     Generate your QR Code
                   </button>
+
                   <button
                     type="button"
                     @click="downloadQRCode()"
                     :disabled="!state.resultGenerateLinkQR"
-                    class="ml-3 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:pointer-events-none"
+                    class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:pointer-events-none"
                   >
                     <IconSvg
                       class="!bg-white"
