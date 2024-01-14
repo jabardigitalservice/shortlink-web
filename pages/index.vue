@@ -1,6 +1,6 @@
 <template>
-  <div class="h-screen flex items-center justify-center bg-[#F5F6F7]">
-    <div class="flex flex-wrap w-[1120px] p-5">
+  <div class="md:h-screen h-full flex items-center justify-center bg-[#F5F6F7]">
+    <div class="flex flex-wrap w-[1120px] p-5 mt-[50px]">
       <div class="w-full">
         <ul class="flex mb-[-3px] list-none justify-center">
           <li class="tabs-title">
@@ -10,7 +10,7 @@
               @click="toggleTabs(1)"
               :class="{
                 'text-black hover-active ': state.openTab !== 1,
-                'text-blue-600 border-active': state.openTab === 1,
+                ' border-active font-bold': state.openTab === 1,
               }"
             >
               <IconSvg
@@ -32,7 +32,7 @@
               :aria-selected="state.openTab === 2 ? 'true' : 'false'"
               :class="{
                 'text-black hover-active ': state.openTab !== 2,
-                'text-blue-600 border-active': state.openTab === 2,
+                ' border-active font-bold': state.openTab === 2,
               }"
             >
               <IconSvg
@@ -61,7 +61,7 @@
             >
               <FormLink ref="formLinkRef" @submit="handleSubmit" />
 
-              <div class="mt-0 px-5">
+              <div class="mt-5 md:mt-0 px-5" v-if="!state.resultGenerateLink">
                 <span
                   class="p-3 w-full inline-flex items-center gap-x-1 text-md font-medium bg-blue-100 text-blue-800 rounded"
                 >
@@ -72,6 +72,13 @@
                   />
                   Make your link unique
                 </span>
+              </div>
+
+              <div class="mt-5 md:mt-2 px-5" v-else>
+                <CopyToClip
+                  :url="state.resultGenerateLink"
+                  
+                />
               </div>
 
               <div class="px-5 mt-5">
@@ -94,7 +101,12 @@
                   @click="submitRef()"
                   class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
                 >
-                  Generate your link
+                  <IconSvg
+                    class="!bg-white"
+                    icon="/icons/common/star-fall-2.svg"
+                    :size="24"
+                  />
+                  Generate your unique link
                 </button>
               </div>
             </div>
@@ -131,6 +143,7 @@ const runtimeConfig = useRuntimeConfig();
 const state = reactive({
   openTab: 1,
   loading: false,
+  resultGenerateLink: "",
 });
 
 function toggleTabs(tabNumber) {
@@ -147,8 +160,7 @@ function submitRef() {
 
 async function handleSubmit(fields) {
   state.loading = true;
-  console.log(fields.longLink);
-
+  state.resultGenerateLink = "";
   try {
     const dataForm = {
       url: fields.longLink,
@@ -158,10 +170,13 @@ async function handleSubmit(fields) {
       method: "post",
       body: dataForm,
     });
-    console.log(data)
+
+    state.resultGenerateLink = data.value.data.short_link;
+
     state.loading = false;
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    state.loading = false;
   }
 }
 </script>

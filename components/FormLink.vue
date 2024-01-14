@@ -26,7 +26,7 @@
     </label>
 
     <div
-      class="relative flex-1 flex flex-col mb-0 text-[20px] font-medium text-gray-900 w-full"
+      class="relative flex-3 flex flex-col mb-0 text-[20px] font-medium text-gray-900  w-full md:w-auto"
     >
 
       <label class=" mb-2 font-bold text-gray-900">Domain</label>
@@ -46,40 +46,35 @@
     </div>
     
 
-    <div
+    <label
       class="relative flex-1 flex flex-col mb-0 text-[20px] font-medium text-gray-900"
     >
-      <label class="font-bold flex items-center gap-3 mb-2">
+      <div class="font-bold flex items-center gap-1 mb-2">
         Enter a back-half
         <span class="font-normal">(optional)</span>
         <span class="relative group">
           <span
-            class="hidden group-hover:flex justify-center items-center px-2 py-1 text-xs absolute -right-2 transform translate-x-full -translate-y-1/2 w-[255px] top-1/2 bg-black text-white"
+            class="hidden group-hover:flex justify-center items-center px-2 py-1 text-xs absolute -right-2 transform md:translate-x-full -translate-y-1/2 w-[255px] top-1/2 bg-black text-white"
           >
             Add your own words at the end of a link (e.g.,
-            “lnk.digiteam.id/twitter_bits” instead of
-            “lnk.digiteam.id/2ZonlUz”)</span
+            “ketemuAgung” will be
+            “lnk.digiteam.id/ketemuAgung”).
+            <br><br>
+
+            If you don't enter the back-half, the URL will be generated randomly.
+            </span
           >
-          <IconSvg icon="/icons/common/answer.svg" :size="16" />
+          <IconSvg icon="/icons/common/answer.svg" :size="16" class="!bg-blue-500"/>
         </span>
-      </label>
+      </div>
       <input
         class="rounded-md  pl-6 pr-2 py-2 border-2 border-gray-500 placeholder-gray-400"
         type="text"
         name="short-link"
         v-model="fields.shortLink"
         placeholder="example: favorite-link"
-        :class="{ isError: eshortLink.length }"
       />
-
-      <span
-        v-for="(msg, index) in eshortLink"
-        :key="index"
-        class="font-normal text-red-500 text-sm"
-      >
-        {{ msg }}
-      </span>
-    </div>
+    </label>
   </form>
 </template>
 
@@ -96,7 +91,6 @@ const emit = defineEmits(["submit"]);
 
 const fields = reactive({
   longLink: null,
-  shortLink: null,
 });
 
 const v$ = useValidator(
@@ -108,18 +102,11 @@ const v$ = useValidator(
       ),
       url: helpers.withMessage("Please enter a valid URL.", url),
     },
-    shortLink: {
-      required: helpers.withMessage(
-        "This value should not be blank.",
-        required
-      ),
-    },
   },
   fields
 );
 
 const elongLink = computed(() => v$.getError("longLink"));
-const eshortLink = computed(() => v$.getError("shortLink"));
 
 async function onSubmit() {
   const isValid = await v$.validator.$validate();
