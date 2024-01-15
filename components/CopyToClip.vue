@@ -57,6 +57,6 @@ const copyToClipboard = () => {
   navigator.clipboard.writeText(props.url);
   setTimeout(function () {
     copyNotification.value = false;
-  }, 2000);
+  }, 1000);
 };
 </script>
